@@ -136,10 +136,22 @@ function formatActivity(e) {
     `;
   }
 
-  if (e.action === "opened") {
+  if (e.action === "pull_request") {
     return `
       <span class="highlight">${e.author}</span>
-      opened a pull request from
+      submitted a pull request from
+      <span class="highlight">${e.from_branch}</span>
+      to
+      <span class="highlight">${e.to_branch}</span>
+      on
+      <span class="highlight">${time}</span>
+    `;
+  }
+
+  if (e.action === "reopened") {
+    return `
+      <span class="highlight">${e.author}</span>
+      reopened a pull request from
       <span class="highlight">${e.from_branch}</span>
       to
       <span class="highlight">${e.to_branch}</span>
