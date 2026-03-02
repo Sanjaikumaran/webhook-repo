@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Repository Activity</title>
+
+  <style>
+    body {
+      font-family: system-ui, Arial;
+      max-width: 900px;
+      margin: 40px auto;
+      background: #fafafa;
+      color: #222;
+    }
+
+    h1 { margin-bottom: 10px; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .status {
+      font-size: 14px;
+      color: green;
+    }
+
+    .toggle {
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      background: black;
+      color: white;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .feed p {
+      margin: 8px 0;
+      padding: 12px;
+      background: #f5f5f5;
+      border-radius: 6px;
+      color: #666;
+      font-size: 15px;
+    }
+
+    .highlight {
+      color: #111;
+      font-weight: 600;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+
+    th { background: #f0f0f0; }
+
+    .hidden { display: none; }
+  </style>
+</head>
+
+<body>
+
+<h1>Repository Activity</h1>
+
+<div class="topbar">
+  <button class="toggle" onclick="toggleView()">Toggle View</button>
+  <div class="status" id="status">● Live</div>
+</div>
+
+<div class="card">
+
+  <div id="activityView">
+    <h3>Activity Log</h3>
+    <div class="feed" id="messages"></div>
+  </div>
+
+  <div id="tableView" class="hidden">
+    <h3>Raw Event Data</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Author</th>
+          <th>Action</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Time (UTC)</th>
+        </tr>
+      </thead>
+      <tbody id="eventsTable"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+let showTable = false;
+
+function toggleView() {
+  showTable = !showTable;
+  document.getElementById("activityView").classList.toggle("hidden");
+  document.getElementById("tableView").classList.toggle("hidden");
+}
+
+function formatActivity(e) {
+  const time = new Date(e.timestamp).toUTCString();
+
+  if (e.action === "push") {
+    return `
+      <span class="highlight">${e.author}</span>
+      pushed to
+      <span class="highlight">${e.to_branch}</span>
+      on
+      <span class="highlight">${time}</span>
+    `;
+  }
+
+  if (e.action === "pull_request") {
+    return `
+      <span class="highlight">${e.author}</span>
+      submitted a pull request from
+      <span class="highlight">${e.from_branch}</span>
+      to
+      <span class="highlight">${e.to_branch}</span>
+      on
+      <span class="highlight">${time}</span>
+    `;
+  }
+
+  if (e.action === "merge") {
+    return `
+      <span class="highlight">${e.author}</span>
+      merged branch
+      <span class="highlight">${e.from_branch}</span>
+      to
+      <span class="highlight">${e.to_branch}</span>
+      on
+      <span class="highlight">${time}</span>
+    `;
+  }
+
+  return "";
+}
+
+async function loadEvents() {
+  try {
+    const res = await fetch(window.location.origin + "/webhook/events");
+    const data = await res.json();
+
+    const feed = document.getElementById("messages");
+    feed.innerHTML = "";
+    data.forEach(e => {
+      feed.innerHTML += `<p>${formatActivity(e)}</p>`;
+    });
+
+    const table = document.getElementById("eventsTable");
+    table.innerHTML = "";
+    data.forEach(e => {
+      table.innerHTML += `
+        <tr>
+          <td>${e.author}</td>
+          <td>${e.action}</td>
+          <td>${e.from_branch || "-"}</td>
+          <td>${e.to_branch}</td>
+          <td>${new Date(e.timestamp).toUTCString()}</td>
+        </tr>
+      `;
+    });
+
+    document.getElementById("status").textContent = "● Live";
+    document.getElementById("status").style.color = "green";
+
+  } catch (err) {
+    document.getElementById("status").textContent = "● Disconnected";
+    document.getElementById("status").style.color = "red";
+  }
+}
+
+loadEvents();
+setInterval(loadEvents, 15000);
+</script>
+
+</body>
+</html>
