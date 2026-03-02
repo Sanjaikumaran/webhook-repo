@@ -23,32 +23,34 @@
 
     .status {
       font-size: 14px;
-      color: green;
+      font-weight: 500;
     }
 
     .toggle {
-      padding: 8px 14px;
-      border-radius: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
       border: none;
       cursor: pointer;
-      background: black;
+      background: #111;
       color: white;
+      font-weight: 500;
     }
 
     .card {
       background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      padding: 22px;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
     }
 
     .feed p {
-      margin: 8px 0;
-      padding: 12px;
+      margin: 10px 0;
+      padding: 14px;
       background: #f5f5f5;
-      border-radius: 6px;
-      color: #666;
+      border-radius: 8px;
+      color: #555;
       font-size: 15px;
+      line-height: 1.6;
     }
 
     .highlight {
@@ -59,15 +61,20 @@
     table {
       width: 100%;
       border-collapse: collapse;
+      margin-top: 10px;
     }
 
     th, td {
       padding: 12px;
       border-bottom: 1px solid #eee;
       text-align: left;
+      font-size: 14px;
     }
 
-    th { background: #f0f0f0; }
+    th {
+      background: #f0f0f0;
+      font-weight: 600;
+    }
 
     .hidden { display: none; }
   </style>
@@ -129,10 +136,22 @@ function formatActivity(e) {
     `;
   }
 
-  if (e.action === "pull_request") {
+  if (e.action === "opened") {
     return `
       <span class="highlight">${e.author}</span>
-      submitted a pull request from
+      opened a pull request from
+      <span class="highlight">${e.from_branch}</span>
+      to
+      <span class="highlight">${e.to_branch}</span>
+      on
+      <span class="highlight">${time}</span>
+    `;
+  }
+
+  if (e.action === "closed") {
+    return `
+      <span class="highlight">${e.author}</span>
+      closed a pull request from
       <span class="highlight">${e.from_branch}</span>
       to
       <span class="highlight">${e.to_branch}</span>
@@ -181,12 +200,14 @@ async function loadEvents() {
       `;
     });
 
-    document.getElementById("status").textContent = "● Live";
-    document.getElementById("status").style.color = "green";
+    const status = document.getElementById("status");
+    status.textContent = "● Live";
+    status.style.color = "green";
 
   } catch (err) {
-    document.getElementById("status").textContent = "● Disconnected";
-    document.getElementById("status").style.color = "red";
+    const status = document.getElementById("status");
+    status.textContent = "● Disconnected";
+    status.style.color = "red";
   }
 }
 

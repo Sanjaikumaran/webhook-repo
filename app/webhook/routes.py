@@ -25,8 +25,19 @@ def receiver():
 
     elif event == "pull_request":
         pr = payload["pull_request"]
+        action_type = payload.get("action")
 
-        action = "merge" if pr.get("merged") else "pull_request"
+        if action_type == "closed" and pr.get("merged") is True:
+            action = "merge"
+
+        elif action_type == "closed":
+            action = "closed"
+
+        elif action_type == "opened":
+            action = "opened"
+
+        else:
+            return jsonify({"status": "ignored"}), 200
 
         doc.update({
             "author": pr["user"]["login"],
@@ -39,9 +50,8 @@ def receiver():
         return jsonify({"status": "ignored"}), 200
 
     mongo.db.events.insert_one(doc)
-
     return jsonify({"status": "stored"}), 200
-
+    
 @webhook.route('/events', methods=["GET"])
 def get_events():
     docs = list(mongo.db.events.find().sort("timestamp", -1).limit(20))
