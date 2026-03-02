@@ -36,4 +36,4 @@ The backend stores events and the frontend displays them in a human-readable act
 
 You can view the live repository activity here:
 
-👉 https://webhook-app-ncsq.onrender.com/ui
+👉 https://webhook-app-ncsq.onrender.com
