@@ -101,6 +101,7 @@
     <table>
       <thead>
         <tr>
+          <th>Request ID</th>
           <th>Author</th>
           <th>Action</th>
           <th>From</th>
@@ -203,6 +204,7 @@ async function loadEvents() {
     data.forEach(e => {
       table.innerHTML += `
         <tr>
+          <td>${e.request_id}</td>
           <td>${e.author}</td>
           <td>${e.action}</td>
           <td>${e.from_branch || "-"}</td>

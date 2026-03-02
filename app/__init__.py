@@ -16,11 +16,11 @@ def create_app():
 
     app.register_blueprint(webhook)
 
-    @app.route("/")
-    def home():
+    @app.route("/healthz")
+    def healthz():
         return "Webhook server running"
 
-    @app.route("/ui")
+    @app.route("/")
     def ui():
         return send_from_directory("../ui", "index.html")
 
